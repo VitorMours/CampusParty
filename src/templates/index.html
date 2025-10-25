@@ -1,0 +1,345 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  </head>
+  <body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-blue-600 shadow-lg">
+      <div class="container mx-auto px-4 py-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-2xl font-bold text-white">CheckIn</h3>
+          <nav class="hidden md:block">
+            <ul class="flex space-x-6">
+              <li><a href="#" class="text-white hover:text-blue-200 transition duration-200">Início</a></li>
+              <li><a href="#" class="text-white hover:text-blue-200 transition duration-200">Sobre</a></li>
+              <li><a href="#" class="text-white hover:text-blue-200 transition duration-200">Contato</a></li>
+            </ul>
+          </nav>
+          <button class="md:hidden text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="min-h-screen">
+      <!-- Hero Section -->
+      <section class="py-20">
+        <div class="container mx-auto px-4 text-center">
+          <h2 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+            Sua nova forma,<br>
+            <span class="">de se fazer presente...</span>
+          </h2>
+          <p class="text-xl max-w-2xl mx-auto">
+            Registre sua presença de forma rápida, simples e moderna. 
+            Tecnologia a serviço da conectividade.
+          </p>
+        </div>
+      </section>
+
+      <!-- Form and Map Section -->
+      <section class="container mx-auto px-4 py-16">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+          
+          <!-- Form Section -->
+          <article class="bg-white rounded-2xl shadow-xl p-8 hover:shadow-2xl transition duration-300">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">Registrar Presença</h3>
+            
+            <!-- Mensagem de status -->
+            <div id="statusMessage" class="hidden mb-4 p-4 rounded-lg"></div>
+            
+            <form id="checkinForm" class="space-y-6" method="POST" action="/checkin">
+              <div class="space-y-2">
+                <label for="nome" class="block text-sm font-medium text-gray-700">Nome</label>
+                <input 
+                  id="nome" 
+                  name="nome" 
+                  type="text" 
+                  required
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                  placeholder="Digite seu nome"
+                >
+              </div>
+              
+              <div class="space-y-2">
+                <label for="sobrenome" class="block text-sm font-medium text-gray-700">Sobrenome</label>
+                <input 
+                  id="sobrenome" 
+                  name="sobrenome" 
+                  type="text" 
+                  required
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                  placeholder="Digite seu sobrenome"
+                >
+              </div>
+              
+              <div class="space-y-2">
+                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                <input 
+                  id="email" 
+                  name="email" 
+                  type="email" 
+                  required
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                  placeholder="seu@email.com"
+                >
+              </div>
+
+              <!-- Campos ocultos para coordenadas -->
+              <input type="hidden" id="latitude" name="latitude">
+              <input type="hidden" id="longitude" name="longitude">
+              <input type="hidden" id="accuracy" name="accuracy">
+
+              <button 
+                type="submit" 
+                id="submitBtn"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-lg transition duration-200 transform hover:scale-105 focus:ring-4 focus:ring-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span class="flex items-center justify-center">
+                  <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span id="buttonText">Marcar Presença</span>
+                  <span id="loadingSpinner" class="hidden ml-2">
+                    <svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </span>
+                </span>
+              </button>
+
+              <!-- Informações de localização -->
+              <div id="locationInfo" class="hidden p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="flex items-center text-sm text-blue-700">
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  </svg>
+                  <span>Localização detectada: </span>
+                  <span id="coordinates" class="font-mono ml-1"></span>
+                </div>
+                <div class="text-xs text-blue-600 mt-1" id="accuracyInfo"></div>
+              </div>
+            </form>
+
+            <!-- Mensagem de permissão negada -->
+            <div id="locationDenied" class="hidden mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div class="flex items-center text-red-700">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <span>Permissão de localização negada. Não é possível registrar presença.</span>
+              </div>
+            </div>
+            
+            <div class="mt-6 text-center">
+              <p class="text-sm text-gray-600">
+                Ao registrar, você concorda com nossos 
+                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">termos de uso</a>
+              </p>
+            </div>
+          </article>
+
+          <!-- Map Section -->
+          <article class="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition duration-300">
+            {{ iframe|safe }}
+          </article>
+
+        </div>
+      </section>
+
+      <!-- Features Section -->
+      <section class="bg-white py-16">
+        <div class="container mx-auto px-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="text-center p-6">
+              <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <h4 class="text-xl font-semibold text-gray-800 mb-2">Rápido</h4>
+              <p class="text-gray-600">Registro de presença em menos de 30 segundos</p>
+            </div>
+            
+            <div class="text-center p-6">
+              <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <h4 class="text-xl font-semibold text-gray-800 mb-2">Seguro</h4>
+              <p class="text-gray-600">Seus dados protegidos com criptografia avançada</p>
+            </div>
+            
+            <div class="text-center p-6">
+              <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+              </div>
+              <h4 class="text-xl font-semibold text-gray-800 mb-2">Social</h4>
+              <p class="text-gray-600">Compartilhe sua participação nas redes sociais</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+      <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <div class="mb-4 md:mb-0">
+            <h3 class="text-2xl font-bold">CheckIn</h3>
+            <p class="text-gray-400">Conectando pessoas, registrando momentos</p>
+          </div>
+          <div class="flex space-x-4">
+            <a href="#" class="text-gray-400 hover:text-white transition duration-200">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+              </svg>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-white transition duration-200">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+              </svg>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-white transition duration-200">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+        <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+          <p>&copy; 2024 CheckIn. Todos os direitos reservados.</p>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('checkinForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const buttonText = document.getElementById('buttonText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const statusMessage = document.getElementById('statusMessage');
+        const locationInfo = document.getElementById('locationInfo');
+        const locationDenied = document.getElementById('locationDenied');
+        const coordinatesSpan = document.getElementById('coordinates');
+        const accuracyInfo = document.getElementById('accuracyInfo');
+        const latitudeInput = document.getElementById('latitude');
+        const longitudeInput = document.getElementById('longitude');
+        const accuracyInput = document.getElementById('accuracy');
+
+        // Função para mostrar mensagens de status
+        function showStatus(message, type = 'info') {
+          statusMessage.className = `p-4 rounded-lg mb-4 ${
+            type === 'error' ? 'bg-red-100 border border-red-300 text-red-700' :
+            type === 'success' ? 'bg-green-100 border border-green-300 text-green-700' :
+            'bg-blue-100 border border-blue-300 text-blue-700'
+          }`;
+          statusMessage.innerHTML = message;
+          statusMessage.classList.remove('hidden');
+        }
+
+        // Função para obter geolocalização
+        function getLocation() {
+          return new Promise((resolve, reject) => {
+            if (!navigator.geolocation) {
+              reject('Geolocalização não suportada pelo navegador');
+              return;
+            }
+
+            showStatus('Obtendo sua localização...', 'info');
+
+            navigator.geolocation.getCurrentPosition(
+              (position) => {
+                const coords = {
+                  latitude: position.coords.latitude,
+                  longitude: position.coords.longitude,
+                  accuracy: position.coords.accuracy
+                };
+                resolve(coords);
+              },
+              (error) => {
+                let errorMessage = 'Erro ao obter localização: ';
+                switch(error.code) {
+                  case error.PERMISSION_DENIED:
+                    errorMessage += 'Permissão negada pelo usuário';
+                    locationDenied.classList.remove('hidden');
+                    submitBtn.disabled = true;
+                    break;
+                  case error.POSITION_UNAVAILABLE:
+                    errorMessage += 'Localização indisponível';
+                    break;
+                  case error.TIMEOUT:
+                    errorMessage += 'Tempo limite excedido';
+                    break;
+                  default:
+                    errorMessage += 'Erro desconhecido';
+                }
+                reject(errorMessage);
+              },
+              {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 60000
+              }
+            );
+          });
+        }
+
+        // Manipular envio do formulário
+        form.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          
+          // Desabilitar botão e mostrar loading
+          submitBtn.disabled = true;
+          buttonText.textContent = 'Obtendo localização...';
+          loadingSpinner.classList.remove('hidden');
+          statusMessage.classList.add('hidden');
+
+          try {
+            // Obter localização
+            const location = await getLocation();
+            
+            // Preencher campos ocultos com as coordenadas
+            latitudeInput.value = location.latitude;
+            longitudeInput.value = location.longitude;
+            accuracyInput.value = location.accuracy;
+
+            // Mostrar informações da localização
+            coordinatesSpan.textContent = `${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`;
+            accuracyInfo.textContent = `Precisão: ±${Math.round(location.accuracy)} metros`;
+            locationInfo.classList.remove('hidden');
+
+            // Atualizar botão
+            buttonText.textContent = 'Enviando dados...';
+            showStatus('Localização obtida! Enviando dados...', 'success');
+
+            // Aguardar um pouco para o usuário ver a localização
+            setTimeout(() => {
+              // Enviar formulário normalmente
+              form.submit();
+            }, 1000);
+
+          } catch (error) {
+            showStatus(error, 'error');
+            buttonText.textContent = 'Marcar Presença';
+            loadingSpinner.classList.add('hidden');
+            submitBtn.disabled = false;
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
